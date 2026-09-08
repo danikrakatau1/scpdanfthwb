@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="theme-color" content="#07090d" />
+  <title>Passive Fetch / Render Auditor</title>
+  <meta name="description" content="Compare raw HTTP fetch results with a JavaScript-rendered browser view for passive web diagnostics." />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <main class="shell">
+    <header class="hero">
+      <div class="eyebrow">PASSIVE WEB DIAGNOSTICS</div>
+      <h1>Fetch / Render Auditor</h1>
+      <p class="lead">Compare what a server returns to a plain HTTP client with what appears after JavaScript runs in a browser.</p>
+    </header>
+
+    <section class="panel scan-panel" aria-labelledby="scan-title">
+      <div class="panel-head">
+        <div>
+          <span class="kicker">TARGET</span>
+          <h2 id="scan-title">Run a passive scan</h2>
+        </div>
+        <div id="healthBadge" class="badge neutral">Checking Worker…</div>
+      </div>
+
+      <form id="scanForm">
+        <label for="targetUrl">Public URL</label>
+        <div class="input-row">
+          <input id="targetUrl" name="targetUrl" type="url" inputmode="url" placeholder="https://example.com" autocomplete="url" required />
+          <button id="scanButton" type="submit">Scan</button>
+        </div>
+
+        <div class="options-row">
+          <div class="segmented" role="group" aria-label="Scan mode">
+            <button type="button" class="mode active" data-mode="quick">Quick scan</button>
+            <button type="button" class="mode" data-mode="deep">Deep passive</button>
+          </div>
+
+          <label class="key-field" for="accessKey">
+            <span>Access key</span>
+            <input id="accessKey" type="password" placeholder="AUDIT_KEY" autocomplete="off" />
+          </label>
+        </div>
+
+        <label class="consent">
+          <input id="consent" type="checkbox" required />
+          <span>I will use this only for public pages I am authorized or legitimately entitled to inspect.</span>
+        </label>
+      </form>
+
+      <div class="notice">
+        <strong>Passive policy:</strong> no form submission, no clicks, no custom request body, no credential replay, and no private/localhost literal targets.
+      </div>
+    </section>
+
+    <section id="loading" class="panel hidden loading-panel" aria-live="polite">
+      <div class="spinner" aria-hidden="true"></div>
+      <div>
+        <strong>Inspecting target…</strong>
+        <p id="loadingText">Fetching raw HTML and response metadata.</p>
+      </div>
+    </section>
+
+    <section id="errorPanel" class="panel hidden error-panel" aria-live="assertive">
+      <div class="kicker">SCAN ERROR</div>
+      <h2 id="errorTitle">Unable to scan</h2>
+      <p id="errorMessage"></p>
+    </section>
+
+    <section id="results" class="results hidden" aria-live="polite">
+      <div class="summary-grid">
+        <article class="metric-card hero-metric">
+          <span class="metric-label">Verdict</span>
+          <strong id="verdictLabel">—</strong>
+          <span id="verdictCode" class="metric-sub">—</span>
+        </article>
+        <article class="metric-card">
+          <span class="metric-label">Fetchability</span>
+          <strong id="scoreValue">—</strong>
+          <span class="metric-sub">diagnostic score</span>
+        </article>
+        <article class="metric-card">
+          <span class="metric-label">HTTP</span>
+          <strong id="httpStatus">—</strong>
+          <span id="httpType" class="metric-sub">—</span>
+        </article>
+        <article class="metric-card">
+          <span class="metric-label">Duration</span>
+          <strong id="duration">—</strong>
+          <span class="metric-sub">total scan time</span>
+        </article>
+      </div>
+
+      <div class="two-col">
+        <article class="panel data-panel">
+          <div class="panel-head compact">
+            <div><span class="kicker">RAW HTTP</span><h2>Server response</h2></div>
+          </div>
+          <dl id="rawFacts" class="facts"></dl>
+        </article>
+
+        <article class="panel data-panel">
+          <div class="panel-head compact">
+            <div><span class="kicker">BROWSER</span><h2>Rendered view</h2></div>
+          </div>
+          <dl id="renderFacts" class="facts"></dl>
+        </article>
+      </div>
+
+      <article id="comparisonPanel" class="panel data-panel hidden">
+        <div class="panel-head compact">
+          <div><span class="kicker">DIFF</span><h2>Raw vs rendered</h2></div>
+        </div>
+        <div id="comparisonMetrics" class="mini-grid"></div>
+      </article>
+
+      <article class="panel data-panel">
+        <div class="panel-head compact">
+          <div><span class="kicker">FINGERPRINT</span><h2>Technology & exposure clues</h2></div>
+        </div>
+        <div id="techChips" class="chips"></div>
+        <div class="section-divider"></div>
+        <h3>Discovered API-like URLs</h3>
+        <div id="apiList" class="url-list"></div>
+      </article>
+
+      <article class="panel data-panel">
+        <div class="panel-head compact">
+          <div><span class="kicker">ASSETS</span><h2>Frontend inventory</h2></div>
+        </div>
+        <div id="assetTabs" class="asset-tabs"></div>
+      </article>
+
+      <article class="panel data-panel">
+        <div class="panel-head compact">
+          <div><span class="kicker">SECURITY HEADERS</span><h2>Presence check</h2></div>
+        </div>
+        <div id="securityHeaders" class="header-grid"></div>
+      </article>
+
+      <details class="panel json-panel">
+        <summary>Raw JSON report</summary>
+        <pre id="jsonOutput"></pre>
+      </details>
+    </section>
+
+    <footer>
+      Passive Fetch / Render Auditor · Cloudflare Workers + Browser Run
+    </footer>
+  </main>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
