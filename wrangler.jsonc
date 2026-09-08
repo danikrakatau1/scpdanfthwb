@@ -1,0 +1,17 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "passive-fetch-render-auditor",
+  "main": "src/index.js",
+  "compatibility_date": "2026-09-09",
+  "browser": {
+    "binding": "BROWSER"
+  },
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application"
+  },
+  "observability": {
+    "enabled": true
+  }
+}
