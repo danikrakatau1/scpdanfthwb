@@ -10,7 +10,7 @@ if (panel) {
   v2Button.id = 'buildV2Button';
   v2Button.type = 'button';
   v2Button.className = 'primary-action v2-primary';
-  v2Button.textContent = 'Build V2.3.2 · Menu Fidelity Finalizer';
+  v2Button.textContent = 'Build V2.3.3 · Geometry Lock Guard';
 
   if (oldButton?.parentElement) {
     oldButton.parentElement.appendChild(actions);
@@ -23,7 +23,7 @@ if (panel) {
   result.innerHTML = `
     <div class="v2-result-head">
       <div>
-        <span class="kicker">MENU FIDELITY FINALIZER V2.3.2</span>
+        <span class="kicker">GEOMETRY LOCK GUARD V2.3.3</span>
         <h3 id="v2Title">Generated reconstruction</h3>
         <p id="v2Meta"></p>
       </div>
@@ -33,8 +33,8 @@ if (panel) {
       </div>
     </div>
     <div id="v2Metrics" class="mini-grid build-metrics"></div>
-    <div class="v2-note">V2.3.2 preserves the V2.1.3 Structure Lock, V2.2.1 Geometry Baseline, V2.3 visual pass and V2.3.1 nested-menu recovery. It finalizes three remaining fidelity gaps from public source signals: exact Blog date/category metadata, the Blog “see all” CTA, and the Destinations submenu label/map/geometry. Output still uses generated CSS/JS only; target JavaScript, target layout CSS and target font files remain excluded.</div>
-    <div class="preview-shell v2-preview-shell"><iframe id="v2Preview" title="Menu fidelity finalizer reconstruction preview" sandbox="allow-scripts"></iframe></div>`;
+    <div class="v2-note">V2.3.3 preserves V2.3.2 menu finalization and enforces the locked V2.2.1 geometry baseline as an invariant. Recovered geometry is validated before delivery; zero/invalid critical tokens are rejected and replaced by the locked generated baseline. Target JavaScript, target layout CSS and target font files remain excluded.</div>
+    <div class="preview-shell v2-preview-shell"><iframe id="v2Preview" title="Geometry lock guard reconstruction preview" sandbox="allow-scripts"></iframe></div>`;
   panel.appendChild(result);
 
   injectStyles();
@@ -50,7 +50,7 @@ if (panel) {
     hideError();
     v2Button.disabled = true;
     const previous = v2Button.textContent;
-    v2Button.textContent = 'Building V2.3.2 finalizer…';
+    v2Button.textContent = 'Building V2.3.3 guard…';
     result.classList.add('hidden');
 
     try {
@@ -69,7 +69,7 @@ if (panel) {
       result.classList.remove('hidden');
       result.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (error) {
-      showError('Unable to build V2.3.2 reconstruction', error.message || String(error));
+      showError('Unable to build V2.3.3 reconstruction', error.message || String(error));
     } finally {
       v2Button.disabled = false;
       v2Button.textContent = previous;
@@ -90,7 +90,7 @@ if (panel) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = currentBuild.filename || 'clean-reconstruction-v232.html';
+    a.download = currentBuild.filename || 'clean-reconstruction-v233.html';
     document.body.appendChild(a);
     a.click();
     a.remove();
@@ -98,28 +98,33 @@ if (panel) {
   });
 
   function render(build) {
-    result.querySelector('#v2Title').textContent = build.title || 'Menu fidelity finalizer reconstruction';
-    result.querySelector('#v2Meta').textContent = `${formatBytes(build.htmlBytes || 0)} · ${formatDuration(build.durationMs || 0)} · ${build.stats?.contentScope || 'scoped content'} · menu finalizer · no target JS/CSS copy`;
-
     const stats = build.stats || {};
+    result.querySelector('#v2Title').textContent = build.title || 'Geometry lock guard reconstruction';
+    result.querySelector('#v2Meta').textContent = `${formatBytes(build.htmlBytes || 0)} · ${formatDuration(build.durationMs || 0)} · guarded geometry · finalized menu · no target JS/CSS copy`;
+
     const metrics = [
       ['Structure lock', stats.structuralLockReady ? 'READY' : 'CHECK'],
-      ['Geometry lock', stats.geometryLockReady ? 'READY' : 'CHECK'],
-      ['Visual engine', stats.visualFidelityEngineApplied ? 'ACTIVE' : 'CHECK'],
-      ['Menu base', stats.menuSurfaceFidelityPolishApplied ? 'ACTIVE' : 'CHECK'],
+      ['Geometry lock', stats.geometryLockReady ? 'READY' : 'BLOCKED'],
+      ['Geometry guard', stats.geometryLockGuardApplied ? 'ACTIVE' : 'CHECK'],
+      ['Zero regression', stats.geometryZeroTokenRegressionDetected ? 'DETECTED + REPAIRED' : 'CLEAR'],
+      ['Locked fallback', stats.geometryLockedFallbackApplied ? 'APPLIED' : 'NOT NEEDED'],
+      ['Tokens after guard', stats.geometryTokensValidAfterGuard ? 'VALID' : 'INVALID'],
+      ['Positive invariants', `${stats.geometryRequiredPositiveRecovered ?? 0}/${stats.geometryRequiredPositiveCount ?? 0}`],
+      ['Gap', stats.geometryGap ?? '—'],
+      ['Side margin', stats.geometrySide ?? '—'],
+      ['Mobile side', stats.geometrySideMobile ?? '—'],
+      ['Radius', stats.geometryRadius ?? '—'],
+      ['Mobile radius', stats.geometryRadiusMobile ?? '—'],
+      ['Arrow offset', stats.geometryArrowOffset ?? '—'],
       ['Menu finalizer', stats.menuFidelityFinalizerApplied ? 'READY' : 'CHECK'],
       ['Blog metadata', stats.blogMetadataFinalizerApplied ? `${stats.blogMetadataCardsFixed ?? 0} FIXED` : 'CHECK'],
       ['Blog see all', stats.blogSeeAllRecovered ? 'RECOVERED' : 'CHECK'],
       ['Destinations label', stats.destinationsLabelClickable ? 'LINKED' : 'CHECK'],
       ['Destinations asset', stats.destinationsSubmenuAssetRecovered ? 'RECOVERED' : 'CHECK'],
-      ['Destinations geometry', stats.destinationsSubmenuGeometryRecovered ? 'RECOVERED' : 'CHECK'],
-      ['Journey cards', stats.journeyMenuCardsRecovered ?? 0],
-      ['About links', stats.aboutSubmenuLinksRecovered ?? 0],
-      ['Blog cards', stats.blogMenuCardsRecovered ?? 0],
-      ['Secondary links', stats.secondaryMenuLinksRecovered ?? 0],
       ['Target scripts copied', stats.targetScriptsCopied ?? 0],
       ['Target layout CSS copied', stats.targetLayoutCssCopied ?? 0],
     ];
+
     const box = result.querySelector('#v2Metrics');
     box.innerHTML = '';
     for (const [label, value] of metrics) {
@@ -141,9 +146,7 @@ if (panel) {
     errorPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
-  function hideError() {
-    errorPanel?.classList.add('hidden');
-  }
+  function hideError() { errorPanel?.classList.add('hidden'); }
 }
 
 function injectStyles() {
