@@ -1,6 +1,6 @@
 const $ = (selector) => document.querySelector(selector);
 
-const state = { mode: "quick", report: null };
+const state = { mode: "quick", report: null, build: null, previewUrl: null };
 
 const scanForm = $("#scanForm");
 const targetUrl = $("#targetUrl");
@@ -11,6 +11,13 @@ const loadingText = $("#loadingText");
 const results = $("#results");
 const errorPanel = $("#errorPanel");
 const healthBadge = $("#healthBadge");
+const buildPanel = $("#buildPanel");
+const buildButton = $("#buildButton");
+const buildLoading = $("#buildLoading");
+const buildResult = $("#buildResult");
+const previewFrame = $("#previewFrame");
+const downloadButton = $("#downloadButton");
+const openPreviewButton = $("#openPreviewButton");
 
 for (const button of document.querySelectorAll(".mode")) {
   button.addEventListener("click", () => {
@@ -22,6 +29,7 @@ for (const button of document.querySelectorAll(".mode")) {
 scanForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   hideError();
+  resetBuild();
   results.classList.add("hidden");
   loading.classList.remove("hidden");
   scanButton.disabled = true;
@@ -54,6 +62,59 @@ scanForm.addEventListener("submit", async (event) => {
   }
 });
 
+buildButton.addEventListener("click", async () => {
+  if (!state.report?.target) return;
+  hideError();
+  buildButton.disabled = true;
+  buildLoading.classList.remove("hidden");
+  buildResult.classList.add("hidden");
+
+  try {
+    const response = await fetch("/api/build", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        authorization: `Bearer ${accessKey.value}`,
+      },
+      body: JSON.stringify({ url: state.report.target }),
+    });
+
+    const data = await response.json().catch(() => ({ error: `HTTP ${response.status}` }));
+    if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`);
+
+    state.build = data;
+    renderBuild(data);
+    buildResult.classList.remove("hidden");
+    buildResult.scrollIntoView({ behavior: "smooth", block: "start" });
+  } catch (error) {
+    showError("Unable to build web", error.message || String(error));
+  } finally {
+    buildLoading.classList.add("hidden");
+    buildButton.disabled = false;
+  }
+});
+
+downloadButton.addEventListener("click", () => {
+  if (!state.build?.html) return;
+  const blob = new Blob([state.build.html], { type: "text/html;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = state.build.filename || "reconstructed-web.html";
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1_000);
+});
+
+openPreviewButton.addEventListener("click", () => {
+  if (!state.build?.html) return;
+  const blob = new Blob([state.build.html], { type: "text/html;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  window.open(url, "_blank", "noopener,noreferrer");
+  setTimeout(() => URL.revokeObjectURL(url), 60_000);
+});
+
 async function checkHealth() {
   try {
     const response = await fetch("/api/health", { cache: "no-store" });
@@ -66,6 +127,9 @@ async function checkHealth() {
     } else if (!data.browserRunConfigured) {
       healthBadge.textContent = "Worker online · quick only";
       healthBadge.className = "badge warning";
+    } else if (data.buildWebConfigured) {
+      healthBadge.textContent = "Worker + Browser + Build Web ready";
+      healthBadge.className = "badge success";
     } else {
       healthBadge.textContent = "Worker + Browser Run ready";
       healthBadge.className = "badge success";
@@ -128,6 +192,44 @@ function renderReport(report) {
   renderAssets(report);
   renderSecurityHeaders(report.raw?.securityHeaders || {});
   $("#jsonOutput").textContent = JSON.stringify(report, null, 2);
+
+  buildPanel.classList.toggle("hidden", !report.buildWeb?.available);
+}
+
+function renderBuild(build) {
+  $("#buildTitle").textContent = build.title || "Static reconstruction";
+  $("#buildMeta").textContent = `${formatBytes(build.htmlBytes || 0)} · ${formatDuration(build.durationMs)} · remote public assets may remain`;
+
+  const stats = build.stats || {};
+  const metrics = [
+    ["Scripts removed", stats.removedScripts ?? 0],
+    ["Frames removed", stats.removedFrames ?? 0],
+    ["Forms neutralized", stats.transformedForms ?? 0],
+    ["Event handlers removed", stats.removedEventHandlers ?? 0],
+  ];
+  const container = $("#buildMetrics");
+  container.innerHTML = "";
+  for (const [label, value] of metrics) {
+    const div = document.createElement("div");
+    div.className = "mini";
+    div.innerHTML = `<span>${escapeHtml(label)}</span><strong>${escapeHtml(String(value))}</strong>`;
+    container.appendChild(div);
+  }
+
+  previewFrame.srcdoc = build.html || "";
+}
+
+function resetBuild() {
+  state.report = null;
+  state.build = null;
+  buildPanel.classList.add("hidden");
+  buildResult.classList.add("hidden");
+  buildLoading.classList.add("hidden");
+  previewFrame.srcdoc = "";
+  if (state.previewUrl) {
+    URL.revokeObjectURL(state.previewUrl);
+    state.previewUrl = null;
+  }
 }
 
 function renderComparison(comparison) {
@@ -250,6 +352,7 @@ function showError(title, message) {
   $("#errorTitle").textContent = title;
   $("#errorMessage").textContent = message;
   errorPanel.classList.remove("hidden");
+  errorPanel.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
 function hideError() {
