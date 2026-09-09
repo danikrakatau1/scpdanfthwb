@@ -6,15 +6,16 @@
   <meta name="color-scheme" content="dark" />
   <meta name="theme-color" content="#07090d" />
   <title>Passive Fetch / Render Auditor</title>
-  <meta name="description" content="Compare raw HTTP fetch results with a JavaScript-rendered browser view for passive web diagnostics." />
+  <meta name="description" content="Compare raw HTTP fetch results with a JavaScript-rendered browser view, then build a sanitized static reconstruction." />
   <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/build.css" />
 </head>
 <body>
   <main class="shell">
     <header class="hero">
       <div class="eyebrow">PASSIVE WEB DIAGNOSTICS</div>
       <h1>Fetch / Render Auditor</h1>
-      <p class="lead">Compare what a server returns to a plain HTTP client with what appears after JavaScript runs in a browser.</p>
+      <p class="lead">Compare what a server returns to a plain HTTP client with what appears after JavaScript runs in a browser, then create a sanitized static reconstruction.</p>
     </header>
 
     <section class="panel scan-panel" aria-labelledby="scan-title">
@@ -52,7 +53,7 @@
       </form>
 
       <div class="notice">
-        <strong>Passive policy:</strong> no form submission, no clicks, no custom request body, no credential replay, and no private/localhost literal targets.
+        <strong>Passive policy:</strong> no form submission, no clicks, no custom target request body, no credential replay, and no private/localhost literal targets.
       </div>
     </section>
 
@@ -65,7 +66,7 @@
     </section>
 
     <section id="errorPanel" class="panel hidden error-panel" aria-live="assertive">
-      <div class="kicker">SCAN ERROR</div>
+      <div class="kicker">ERROR</div>
       <h2 id="errorTitle">Unable to scan</h2>
       <p id="errorMessage"></p>
     </section>
@@ -115,6 +116,43 @@
           <div><span class="kicker">DIFF</span><h2>Raw vs rendered</h2></div>
         </div>
         <div id="comparisonMetrics" class="mini-grid"></div>
+      </article>
+
+      <article id="buildPanel" class="panel data-panel build-panel hidden">
+        <div class="panel-head build-head">
+          <div>
+            <span class="kicker">BUILD WEB</span>
+            <h2>Sanitized static reconstruction</h2>
+            <p class="build-copy">Re-render the scanned page and turn its current public view into static HTML. Executable scripts, frames, form submission, inline event handlers and javascript: URLs are removed.</p>
+          </div>
+          <button id="buildButton" type="button" class="primary-action">Build Web</button>
+        </div>
+
+        <div class="build-note">
+          The generated page can still reference public remote CSS, images, fonts and media from the source website. It is a static reconstruction, not a copy of the target backend or JavaScript application.
+        </div>
+
+        <div id="buildLoading" class="inline-loading hidden">
+          <div class="spinner small" aria-hidden="true"></div>
+          <span>Rendering and sanitizing the page…</span>
+        </div>
+
+        <div id="buildResult" class="hidden">
+          <div id="buildMetrics" class="mini-grid build-metrics"></div>
+          <div class="preview-toolbar">
+            <div>
+              <strong id="buildTitle">Static preview</strong>
+              <span id="buildMeta"></span>
+            </div>
+            <div class="preview-actions">
+              <button id="openPreviewButton" type="button" class="secondary-action">Open preview</button>
+              <button id="downloadButton" type="button" class="primary-action">Download HTML</button>
+            </div>
+          </div>
+          <div class="preview-shell">
+            <iframe id="previewFrame" title="Sanitized reconstructed page preview" sandbox=""></iframe>
+          </div>
+        </div>
       </article>
 
       <article class="panel data-panel">
