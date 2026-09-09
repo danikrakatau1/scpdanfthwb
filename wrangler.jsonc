@@ -1,7 +1,7 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "passive-fetch-render-auditor",
-  "main": "src/entry-v22.js",
+  "main": "src/entry-v221.js",
   "compatibility_date": "2026-09-09",
   "browser": {
     "binding": "BROWSER"
