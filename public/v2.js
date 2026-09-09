@@ -10,7 +10,7 @@ if (panel) {
   v2Button.id = 'buildV2Button';
   v2Button.type = 'button';
   v2Button.className = 'primary-action v2-primary';
-  v2Button.textContent = 'Build V2.2 · Layout-Aware Geometry';
+  v2Button.textContent = 'Build V2.2.1 · Geometry Fidelity Polish';
 
   if (oldButton?.parentElement) {
     oldButton.parentElement.appendChild(actions);
@@ -23,7 +23,7 @@ if (panel) {
   result.innerHTML = `
     <div class="v2-result-head">
       <div>
-        <span class="kicker">LAYOUT-AWARE GEOMETRY V2.2</span>
+        <span class="kicker">GEOMETRY FIDELITY POLISH V2.2.1</span>
         <h3 id="v2Title">Generated reconstruction</h3>
         <p id="v2Meta"></p>
       </div>
@@ -33,8 +33,8 @@ if (panel) {
       </div>
     </div>
     <div id="v2Metrics" class="mini-grid build-metrics"></div>
-    <div class="v2-note">V2.2 preserves the V2.1.3 structure lock, then recovers numeric geometry signals such as 12-column grid relationships, side margins, section spacing, hero minimum height, Encounter stage dimensions, arrow offsets and Membership aspect ratio. The output uses generated CSS only; target JavaScript and target CSS are not copied.</div>
-    <div class="preview-shell v2-preview-shell"><iframe id="v2Preview" title="Layout-aware geometry reconstruction preview" sandbox="allow-scripts"></iframe></div>`;
+    <div class="v2-note">V2.2.1 preserves the V2.1.3 structure lock and V2.2 Geometry Engine, then applies three fidelity corrections: true full-bleed Encounters intro media, one continuous Unforgettable Moments canvas, and an absolute 602px desktop Encounter stage with the 992px mobile transition. Output remains generated HTML/CSS/JS; target JavaScript and target layout CSS are not copied.</div>
+    <div class="preview-shell v2-preview-shell"><iframe id="v2Preview" title="Geometry fidelity reconstruction preview" sandbox="allow-scripts"></iframe></div>`;
   panel.appendChild(result);
 
   injectStyles();
@@ -50,7 +50,7 @@ if (panel) {
     hideError();
     v2Button.disabled = true;
     const previous = v2Button.textContent;
-    v2Button.textContent = 'Building V2.2 geometry…';
+    v2Button.textContent = 'Building V2.2.1 fidelity polish…';
     result.classList.add('hidden');
 
     try {
@@ -69,7 +69,7 @@ if (panel) {
       result.classList.remove('hidden');
       result.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (error) {
-      showError('Unable to build V2.2 reconstruction', error.message || String(error));
+      showError('Unable to build V2.2.1 reconstruction', error.message || String(error));
     } finally {
       v2Button.disabled = false;
       v2Button.textContent = previous;
@@ -90,7 +90,7 @@ if (panel) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = currentBuild.filename || 'clean-reconstruction-v22.html';
+    a.download = currentBuild.filename || 'clean-reconstruction-v221.html';
     document.body.appendChild(a);
     a.click();
     a.remove();
@@ -98,17 +98,18 @@ if (panel) {
   });
 
   function render(build) {
-    result.querySelector('#v2Title').textContent = build.title || 'Layout-aware geometry reconstruction';
-    result.querySelector('#v2Meta').textContent = `${formatBytes(build.htmlBytes || 0)} · ${formatDuration(build.durationMs || 0)} · ${build.stats?.contentScope || 'scoped content'} · geometry engine · no target JS/CSS copy`;
+    result.querySelector('#v2Title').textContent = build.title || 'Geometry fidelity reconstruction';
+    result.querySelector('#v2Meta').textContent = `${formatBytes(build.htmlBytes || 0)} · ${formatDuration(build.durationMs || 0)} · ${build.stats?.contentScope || 'scoped content'} · fidelity polish · no target JS/CSS copy`;
 
     const stats = build.stats || {};
     const metrics = [
       ['Structure lock', stats.structuralLockReady ? 'READY' : 'CHECK'],
       ['Geometry engine', stats.geometryEngineApplied ? 'ACTIVE' : 'CHECK'],
-      ['Geometry tokens', stats.geometryTokensRecovered ?? 0],
+      ['Fidelity polish', stats.geometryFidelityPolishApplied ? 'ACTIVE' : 'CHECK'],
+      ['Intro full-bleed', stats.introTrueFullBleedApplied ? 'YES' : 'CHECK'],
+      ['Moments canvas', stats.momentsCompositeApplied ? 'CONTINUOUS' : 'CHECK'],
+      ['Encounter absolute', stats.encounterAbsoluteGeometryApplied ? 'YES' : 'CHECK'],
       ['Grid', stats.geometryGridColumns ? `${stats.geometryGridColumns} cols` : '—'],
-      ['Grid gap', stats.geometryGridGapVw != null ? `${stats.geometryGridGapVw}vw` : '—'],
-      ['Side margin', stats.geometrySideMarginDesktop != null ? `${stats.geometrySideMarginDesktop}px` : '—'],
       ['Encounter stage', stats.geometryEncounterHeightDesktop != null ? `${stats.geometryEncounterHeightDesktop}px` : '—'],
       ['Membership ratio', stats.geometryMembershipAspect ?? '—'],
       ['Target scripts copied', stats.targetScriptsCopied ?? 0],
