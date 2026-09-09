@@ -10,7 +10,7 @@ if (panel) {
   v2Button.id = 'buildV2Button';
   v2Button.type = 'button';
   v2Button.className = 'primary-action v2-primary';
-  v2Button.textContent = 'Build V2.1 · Block-Aware Reconstruction';
+  v2Button.textContent = 'Build V2.1.1 · Structural Fidelity';
 
   if (oldButton?.parentElement) {
     oldButton.parentElement.appendChild(actions);
@@ -23,7 +23,7 @@ if (panel) {
   result.innerHTML = `
     <div class="v2-result-head">
       <div>
-        <span class="kicker">BLOCK-AWARE CLEAN RECONSTRUCTION V2.1</span>
+        <span class="kicker">STRUCTURAL FIDELITY RECONSTRUCTION V2.1.1</span>
         <h3 id="v2Title">Generated reconstruction</h3>
         <p id="v2Meta"></p>
       </div>
@@ -33,8 +33,8 @@ if (panel) {
       </div>
     </div>
     <div id="v2Metrics" class="mini-grid build-metrics"></div>
-    <div class="v2-note">V2.1 scopes reconstruction to the main public content, recovers block structure, brand tokens, Journeys, Destinations and Memberships, then generates fresh HTML/CSS/JS. Target scripts and target layout CSS are not copied.</div>
-    <div class="preview-shell v2-preview-shell"><iframe id="v2Preview" title="Block-aware clean reconstructed page preview" sandbox="allow-scripts"></iframe></div>`;
+    <div class="v2-note">V2.1.1 keeps the V2.1 block-aware content scope, then recovers the real header logo structure, primary navigation, Unforgettable Encounters component data, clean Membership boundaries and source font-family tokens. Target scripts and target layout CSS are still not copied.</div>
+    <div class="preview-shell v2-preview-shell"><iframe id="v2Preview" title="Structural fidelity clean reconstructed page preview" sandbox="allow-scripts"></iframe></div>`;
   panel.appendChild(result);
 
   injectStyles();
@@ -50,7 +50,7 @@ if (panel) {
     hideError();
     v2Button.disabled = true;
     const previous = v2Button.textContent;
-    v2Button.textContent = 'Building V2.1 block-aware reconstruction…';
+    v2Button.textContent = 'Building V2.1.1 structural fidelity…';
     result.classList.add('hidden');
 
     try {
@@ -69,7 +69,7 @@ if (panel) {
       result.classList.remove('hidden');
       result.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (error) {
-      showError('Unable to build V2.1 block-aware reconstruction', error.message || String(error));
+      showError('Unable to build V2.1.1 structural fidelity reconstruction', error.message || String(error));
     } finally {
       v2Button.disabled = false;
       v2Button.textContent = previous;
@@ -90,7 +90,7 @@ if (panel) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = currentBuild.filename || 'clean-reconstruction-v21.html';
+    a.download = currentBuild.filename || 'clean-reconstruction-v211.html';
     document.body.appendChild(a);
     a.click();
     a.remove();
@@ -98,16 +98,16 @@ if (panel) {
   });
 
   function render(build) {
-    result.querySelector('#v2Title').textContent = build.title || 'Block-aware clean reconstruction';
-    result.querySelector('#v2Meta').textContent = `${formatBytes(build.htmlBytes || 0)} · ${formatDuration(build.durationMs || 0)} · ${build.stats?.contentScope || 'scoped content'} · block-aware model · no target JS/CSS layout`;
+    result.querySelector('#v2Title').textContent = build.title || 'Structural fidelity clean reconstruction';
+    result.querySelector('#v2Meta').textContent = `${formatBytes(build.htmlBytes || 0)} · ${formatDuration(build.durationMs || 0)} · ${build.stats?.contentScope || 'scoped content'} · structural fidelity · no target JS/CSS layout`;
 
     const stats = build.stats || {};
     const metrics = [
       ['Blocks', stats.blocksDetected ?? stats.sectionsDetected ?? 0],
-      ['Images selected', stats.imagesSelected ?? 0],
-      ['Testimonials', stats.testimonialsDetected ?? 0],
-      ['Membership assets', stats.membershipsDetected ?? 0],
+      ['Encounter items', stats.encounterItemsRecovered ?? 0],
+      ['Membership assets', stats.membershipAssetsRecovered ?? stats.membershipsDetected ?? 0],
       ['Journeys', stats.journeysDetected ?? 0],
+      ['Structural pass', stats.structuralFidelityApplied ? 'ON' : '—'],
       ['Target scripts copied', stats.targetScriptsCopied ?? 0],
     ];
     const box = result.querySelector('#v2Metrics');
