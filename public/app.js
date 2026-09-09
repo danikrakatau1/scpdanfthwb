@@ -34,7 +34,7 @@ scanForm.addEventListener("submit", async (event) => {
   loading.classList.remove("hidden");
   scanButton.disabled = true;
   loadingText.textContent = state.mode === "deep"
-    ? "Fetching raw HTML, then launching Cloudflare Browser Run for a rendered comparison."
+    ? "Fetching raw HTML, running one Browser Run, sweeping the page, and capturing a sanitized rendered snapshot."
     : "Fetching raw HTML and response metadata.";
 
   try {
@@ -70,6 +70,15 @@ buildButton.addEventListener("click", async () => {
   buildResult.classList.add("hidden");
 
   try {
+    const prebuilt = state.report?.buildWeb?.prebuilt;
+    if (prebuilt?.html) {
+      state.build = prebuilt;
+      renderBuild(prebuilt);
+      buildResult.classList.remove("hidden");
+      buildResult.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+
     const response = await fetch("/api/build", {
       method: "POST",
       headers: {
@@ -127,6 +136,9 @@ async function checkHealth() {
     } else if (!data.browserRunConfigured) {
       healthBadge.textContent = "Worker online · quick only";
       healthBadge.className = "badge warning";
+    } else if (data.renderedSnapshotBuild) {
+      healthBadge.textContent = "Worker + Rendered Snapshot Build ready";
+      healthBadge.className = "badge success";
     } else if (data.buildWebConfigured) {
       healthBadge.textContent = "Worker + Browser + Build Web ready";
       healthBadge.className = "badge success";
@@ -191,21 +203,24 @@ function renderReport(report) {
   renderApiHints(report.raw?.apiHints || []);
   renderAssets(report);
   renderSecurityHeaders(report.raw?.securityHeaders || {});
-  $("#jsonOutput").textContent = JSON.stringify(report, null, 2);
+  renderJsonReport(report);
 
+  const hasPrebuilt = Boolean(report.buildWeb?.prebuilt?.html);
+  buildButton.textContent = hasPrebuilt ? "Use Rendered Snapshot" : "Build Web";
   buildPanel.classList.toggle("hidden", !report.buildWeb?.available);
 }
 
 function renderBuild(build) {
   $("#buildTitle").textContent = build.title || "Static reconstruction";
-  $("#buildMeta").textContent = `${formatBytes(build.htmlBytes || 0)} · ${formatDuration(build.durationMs)} · remote public assets may remain`;
+  const sourceLabel = build.source === "deep-rendered-dom" ? "rendered DOM snapshot" : "raw HTTP fallback";
+  $("#buildMeta").textContent = `${formatBytes(build.htmlBytes || 0)} · ${formatDuration(build.durationMs)} · ${sourceLabel} · remote public assets may remain`;
 
   const stats = build.stats || {};
   const metrics = [
     ["Scripts removed", stats.removedScripts ?? 0],
     ["Frames removed", stats.removedFrames ?? 0],
-    ["Forms neutralized", stats.transformedForms ?? 0],
-    ["Event handlers removed", stats.removedEventHandlers ?? 0],
+    ["Images resolved", stats.resolvedImages ?? stats.promotedLazySources ?? 0],
+    ["Canvas snapshots", stats.canvasSnapshots ?? 0],
   ];
   const container = $("#buildMetrics");
   container.innerHTML = "";
@@ -219,9 +234,26 @@ function renderBuild(build) {
   previewFrame.srcdoc = build.html || "";
 }
 
+function renderJsonReport(report) {
+  const copy = {
+    ...report,
+    buildWeb: report.buildWeb ? { ...report.buildWeb } : report.buildWeb,
+  };
+
+  if (copy.buildWeb?.prebuilt?.html) {
+    copy.buildWeb.prebuilt = {
+      ...copy.buildWeb.prebuilt,
+      html: `[omitted from report view: ${formatBytes(copy.buildWeb.prebuilt.htmlBytes || copy.buildWeb.prebuilt.html.length)} rendered snapshot]`,
+    };
+  }
+
+  $("#jsonOutput").textContent = JSON.stringify(copy, null, 2);
+}
+
 function resetBuild() {
   state.report = null;
   state.build = null;
+  buildButton.textContent = "Build Web";
   buildPanel.classList.add("hidden");
   buildResult.classList.add("hidden");
   buildLoading.classList.add("hidden");
