@@ -10,7 +10,7 @@ if (panel) {
   v2Button.id = 'buildV2Button';
   v2Button.type = 'button';
   v2Button.className = 'primary-action v2-primary';
-  v2Button.textContent = 'Build V2.3.3 · Geometry Lock Guard';
+  v2Button.textContent = 'Build V2.4 · Motion Fidelity Engine';
 
   if (oldButton?.parentElement) {
     oldButton.parentElement.appendChild(actions);
@@ -23,7 +23,7 @@ if (panel) {
   result.innerHTML = `
     <div class="v2-result-head">
       <div>
-        <span class="kicker">GEOMETRY LOCK GUARD V2.3.3</span>
+        <span class="kicker">MOTION FIDELITY ENGINE V2.4</span>
         <h3 id="v2Title">Generated reconstruction</h3>
         <p id="v2Meta"></p>
       </div>
@@ -33,8 +33,8 @@ if (panel) {
       </div>
     </div>
     <div id="v2Metrics" class="mini-grid build-metrics"></div>
-    <div class="v2-note">V2.3.3 preserves V2.3.2 menu finalization and enforces the locked V2.2.1 geometry baseline as an invariant. Recovered geometry is validated before delivery; zero/invalid critical tokens are rejected and replaced by the locked generated baseline. Target JavaScript, target layout CSS and target font files remain excluded.</div>
-    <div class="preview-shell v2-preview-shell"><iframe id="v2Preview" title="Geometry lock guard reconstruction preview" sandbox="allow-scripts"></iframe></div>`;
+    <div class="v2-note">V2.4 preserves the V2.1.3 Structure Baseline, V2.2.1 Geometry Baseline and V2.3.3 Visual Baseline, then adds generated motion choreography for the full menu, submenus, reveals, encounter transitions, hover/press feedback and reduced-motion accessibility. A compatibility bridge keeps the locked menu/finalizer declarations active without copying target JavaScript or target layout CSS.</div>
+    <div class="preview-shell v2-preview-shell"><iframe id="v2Preview" title="Motion fidelity reconstruction preview" sandbox="allow-scripts"></iframe></div>`;
   panel.appendChild(result);
 
   injectStyles();
@@ -50,7 +50,7 @@ if (panel) {
     hideError();
     v2Button.disabled = true;
     const previous = v2Button.textContent;
-    v2Button.textContent = 'Building V2.3.3 guard…';
+    v2Button.textContent = 'Building V2.4 motion fidelity…';
     result.classList.add('hidden');
 
     try {
@@ -69,7 +69,7 @@ if (panel) {
       result.classList.remove('hidden');
       result.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (error) {
-      showError('Unable to build V2.3.3 reconstruction', error.message || String(error));
+      showError('Unable to build V2.4 reconstruction', error.message || String(error));
     } finally {
       v2Button.disabled = false;
       v2Button.textContent = previous;
@@ -90,7 +90,7 @@ if (panel) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = currentBuild.filename || 'clean-reconstruction-v233.html';
+    a.download = currentBuild.filename || 'clean-reconstruction-v24.html';
     document.body.appendChild(a);
     a.click();
     a.remove();
@@ -99,27 +99,26 @@ if (panel) {
 
   function render(build) {
     const stats = build.stats || {};
-    result.querySelector('#v2Title').textContent = build.title || 'Geometry lock guard reconstruction';
-    result.querySelector('#v2Meta').textContent = `${formatBytes(build.htmlBytes || 0)} · ${formatDuration(build.durationMs || 0)} · guarded geometry · finalized menu · no target JS/CSS copy`;
+    result.querySelector('#v2Title').textContent = build.title || 'Motion fidelity reconstruction';
+    result.querySelector('#v2Meta').textContent = `${formatBytes(build.htmlBytes || 0)} · ${formatDuration(build.durationMs || 0)} · locked visual baseline · generated motion · no target JS/CSS copy`;
 
     const metrics = [
       ['Structure lock', stats.structuralLockReady ? 'READY' : 'CHECK'],
       ['Geometry lock', stats.geometryLockReady ? 'READY' : 'BLOCKED'],
-      ['Geometry guard', stats.geometryLockGuardApplied ? 'ACTIVE' : 'CHECK'],
-      ['Zero regression', stats.geometryZeroTokenRegressionDetected ? 'DETECTED + REPAIRED' : 'CLEAR'],
-      ['Locked fallback', stats.geometryLockedFallbackApplied ? 'APPLIED' : 'NOT NEEDED'],
-      ['Tokens after guard', stats.geometryTokensValidAfterGuard ? 'VALID' : 'INVALID'],
-      ['Positive invariants', `${stats.geometryRequiredPositiveRecovered ?? 0}/${stats.geometryRequiredPositiveCount ?? 0}`],
-      ['Gap', stats.geometryGap ?? '—'],
-      ['Side margin', stats.geometrySide ?? '—'],
-      ['Mobile side', stats.geometrySideMobile ?? '—'],
-      ['Radius', stats.geometryRadius ?? '—'],
-      ['Mobile radius', stats.geometryRadiusMobile ?? '—'],
-      ['Arrow offset', stats.geometryArrowOffset ?? '—'],
+      ['Visual baseline', stats.visualBaselinePreserved ? 'LOCKED' : 'CHECK'],
+      ['Motion engine', stats.motionFidelityEngineApplied ? 'ACTIVE' : 'CHECK'],
+      ['Baseline bridge', stats.baselineCompatibilityBridgeApplied ? 'ACTIVE' : 'CHECK'],
+      ['Menu choreography', stats.menuMotionChoreographyApplied ? 'ACTIVE' : 'CHECK'],
+      ['Submenu choreography', stats.submenuMotionChoreographyApplied ? 'ACTIVE' : 'CHECK'],
+      ['Reveal motion', stats.revealMotionPolishApplied ? 'ACTIVE' : 'CHECK'],
+      ['Encounter motion', stats.encounterMotionPolishApplied ? 'ACTIVE' : 'CHECK'],
+      ['Hover / press', stats.hoverPressFeedbackApplied ? 'ACTIVE' : 'CHECK'],
+      ['Reduced motion', stats.reducedMotionGuardApplied ? 'GUARDED' : 'CHECK'],
+      ['Motion tokens', stats.motionTokenCount ?? 0],
+      ['Generated motion CSS', stats.generatedMotionCssApplied ? 'OWN CSS' : 'CHECK'],
+      ['Generated motion JS', stats.generatedMotionJsApplied ? 'OWN JS' : 'CHECK'],
       ['Menu finalizer', stats.menuFidelityFinalizerApplied ? 'READY' : 'CHECK'],
       ['Blog metadata', stats.blogMetadataFinalizerApplied ? `${stats.blogMetadataCardsFixed ?? 0} FIXED` : 'CHECK'],
-      ['Blog see all', stats.blogSeeAllRecovered ? 'RECOVERED' : 'CHECK'],
-      ['Destinations label', stats.destinationsLabelClickable ? 'LINKED' : 'CHECK'],
       ['Destinations asset', stats.destinationsSubmenuAssetRecovered ? 'RECOVERED' : 'CHECK'],
       ['Target scripts copied', stats.targetScriptsCopied ?? 0],
       ['Target layout CSS copied', stats.targetLayoutCssCopied ?? 0],
