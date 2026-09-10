@@ -6,17 +6,75 @@
   <meta name="color-scheme" content="dark" />
   <meta name="theme-color" content="#07090d" />
   <title>Passive Fetch / Render Auditor</title>
-  <meta name="description" content="Compare raw HTTP fetch results with a JavaScript-rendered browser view, then build a sanitized static reconstruction." />
+  <meta name="description" content="Compare raw HTTP fetch results with a JavaScript-rendered browser view, build sanitized reconstructions, or generate standalone landing pages." />
   <link rel="stylesheet" href="/styles.css" />
   <link rel="stylesheet" href="/build.css" />
+  <link rel="stylesheet" href="/landingpage.css" />
 </head>
-<body>
+<body data-tool="auditor">
   <main class="shell">
     <header class="hero">
       <div class="eyebrow">PASSIVE WEB DIAGNOSTICS</div>
       <h1>Fetch / Render Auditor</h1>
       <p class="lead">Compare what a server returns to a plain HTTP client with what appears after JavaScript runs in a browser, then create a sanitized static reconstruction.</p>
     </header>
+
+    <nav class="tool-nav" aria-label="Tools">
+      <button class="tool-tab active" type="button" data-tool-tab="auditor">Auditor</button>
+      <button class="tool-tab" type="button" data-tool-tab="landingpage">Generate Landingpage</button>
+    </nav>
+
+    <section id="landingPagePanel" class="panel landing-page-panel" aria-labelledby="lp-title">
+      <div class="panel-head">
+        <div>
+          <span class="kicker">STANDALONE GENERATOR</span>
+          <h2 id="lp-title">Generate Landingpage</h2>
+          <p>Create a fresh landing page from your own copy. No target JavaScript, target layout CSS, target font files, or target website source is required.</p>
+        </div>
+        <div class="badge success">OUR HTML · CSS · JS</div>
+      </div>
+
+      <form id="landingPageForm">
+        <div class="lp-grid">
+          <div class="lp-fields">
+            <div class="lp-row">
+              <label class="lp-field" for="lpBrand"><span>Brand / project</span><input id="lpBrand" type="text" maxlength="80" placeholder="Acme Studio" required /></label>
+              <label class="lp-field" for="lpTheme"><span>Style</span><select id="lpTheme"><option value="luxury">Luxury</option><option value="editorial">Editorial</option><option value="minimal">Minimal</option><option value="tech">Tech</option></select></label>
+            </div>
+            <label class="lp-field" for="lpEyebrow"><span>Eyebrow</span><input id="lpEyebrow" type="text" maxlength="100" value="DESIGNED TO CONVERT" /></label>
+            <label class="lp-field" for="lpHeadline"><span>Headline</span><input id="lpHeadline" type="text" maxlength="180" placeholder="Turn one clear idea into a page people remember." required /></label>
+            <label class="lp-field" for="lpDescription"><span>Description</span><textarea id="lpDescription" maxlength="420" placeholder="Describe the offer, value, product, service, or campaign in one focused paragraph." required></textarea></label>
+            <div class="lp-row">
+              <label class="lp-field" for="lpCtaLabel"><span>CTA label</span><input id="lpCtaLabel" type="text" maxlength="60" value="Get started" /></label>
+              <label class="lp-field" for="lpCtaHref"><span>CTA link</span><input id="lpCtaHref" type="text" value="#contact" placeholder="https://example.com/contact" /></label>
+            </div>
+            <div class="lp-row">
+              <label class="lp-field" for="lpFeature1"><span>Benefit 1</span><input id="lpFeature1" type="text" maxlength="120" value="Focused message" /></label>
+              <label class="lp-field" for="lpFeature2"><span>Benefit 2</span><input id="lpFeature2" type="text" maxlength="120" value="Responsive by default" /></label>
+            </div>
+            <label class="lp-field" for="lpFeature3"><span>Benefit 3</span><input id="lpFeature3" type="text" maxlength="120" value="Standalone output" /></label>
+          </div>
+
+          <aside class="lp-side">
+            <div class="lp-side-card"><strong>Independent output</strong><p>The generated HTML does not fetch a target page and does not reuse target JavaScript or target layout CSS.</p></div>
+            <div class="lp-side-card"><strong>No external runtime</strong><p>Default output is one HTML file with inline generated CSS and generated JavaScript, plus a restrictive CSP.</p></div>
+            <label class="lp-field" for="lpAccessKey"><span>Access key</span><input id="lpAccessKey" type="password" placeholder="AUDIT_KEY" autocomplete="off" /></label>
+            <div class="lp-actions"><button id="lpGenerate" class="lp-generate" type="submit">Generate Landingpage</button><span id="lpStatus" class="lp-status">Ready.</span></div>
+            <div id="lpError" class="lp-error hidden" role="alert"></div>
+          </aside>
+        </div>
+      </form>
+
+      <div id="lpResult" class="lp-result hidden">
+        <div class="lp-result-head">
+          <div><span class="kicker">GENERATED OUTPUT</span><h3 id="lpTitle">Standalone landing page</h3><p id="lpMeta"></p></div>
+          <div class="preview-actions"><button id="lpOpen" type="button" class="secondary-action">Open preview</button><button id="lpDownload" type="button" class="primary-action">Download HTML</button></div>
+        </div>
+        <div id="lpMetrics" class="mini-grid build-metrics"></div>
+        <div class="lp-note">Generated from the content entered in this form. Target website source is not required by this generator.</div>
+        <div class="lp-preview-shell"><iframe id="lpPreview" title="Generated landing page preview" sandbox="allow-scripts"></iframe></div>
+      </div>
+    </section>
 
     <section class="panel scan-panel" aria-labelledby="scan-title">
       <div class="panel-head">
@@ -73,124 +131,44 @@
 
     <section id="results" class="results hidden" aria-live="polite">
       <div class="summary-grid">
-        <article class="metric-card hero-metric">
-          <span class="metric-label">Verdict</span>
-          <strong id="verdictLabel">—</strong>
-          <span id="verdictCode" class="metric-sub">—</span>
-        </article>
-        <article class="metric-card">
-          <span class="metric-label">Fetchability</span>
-          <strong id="scoreValue">—</strong>
-          <span class="metric-sub">diagnostic score</span>
-        </article>
-        <article class="metric-card">
-          <span class="metric-label">HTTP</span>
-          <strong id="httpStatus">—</strong>
-          <span id="httpType" class="metric-sub">—</span>
-        </article>
-        <article class="metric-card">
-          <span class="metric-label">Duration</span>
-          <strong id="duration">—</strong>
-          <span class="metric-sub">total scan time</span>
-        </article>
+        <article class="metric-card hero-metric"><span class="metric-label">Verdict</span><strong id="verdictLabel">—</strong><span id="verdictCode" class="metric-sub">—</span></article>
+        <article class="metric-card"><span class="metric-label">Fetchability</span><strong id="scoreValue">—</strong><span class="metric-sub">diagnostic score</span></article>
+        <article class="metric-card"><span class="metric-label">HTTP</span><strong id="httpStatus">—</strong><span id="httpType" class="metric-sub">—</span></article>
+        <article class="metric-card"><span class="metric-label">Duration</span><strong id="duration">—</strong><span class="metric-sub">total scan time</span></article>
       </div>
 
       <div class="two-col">
-        <article class="panel data-panel">
-          <div class="panel-head compact">
-            <div><span class="kicker">RAW HTTP</span><h2>Server response</h2></div>
-          </div>
-          <dl id="rawFacts" class="facts"></dl>
-        </article>
-
-        <article class="panel data-panel">
-          <div class="panel-head compact">
-            <div><span class="kicker">BROWSER</span><h2>Rendered view</h2></div>
-          </div>
-          <dl id="renderFacts" class="facts"></dl>
-        </article>
+        <article class="panel data-panel"><div class="panel-head compact"><div><span class="kicker">RAW HTTP</span><h2>Server response</h2></div></div><dl id="rawFacts" class="facts"></dl></article>
+        <article class="panel data-panel"><div class="panel-head compact"><div><span class="kicker">BROWSER</span><h2>Rendered view</h2></div></div><dl id="renderFacts" class="facts"></dl></article>
       </div>
 
-      <article id="comparisonPanel" class="panel data-panel hidden">
-        <div class="panel-head compact">
-          <div><span class="kicker">DIFF</span><h2>Raw vs rendered</h2></div>
-        </div>
-        <div id="comparisonMetrics" class="mini-grid"></div>
-      </article>
+      <article id="comparisonPanel" class="panel data-panel hidden"><div class="panel-head compact"><div><span class="kicker">DIFF</span><h2>Raw vs rendered</h2></div></div><div id="comparisonMetrics" class="mini-grid"></div></article>
 
       <article id="buildPanel" class="panel data-panel build-panel hidden">
         <div class="panel-head build-head">
-          <div>
-            <span class="kicker">BUILD WEB</span>
-            <h2>Sanitized static reconstruction</h2>
-            <p class="build-copy">Re-render the scanned page and turn its current public view into static HTML. Executable scripts, frames, form submission, inline event handlers and javascript: URLs are removed.</p>
-          </div>
+          <div><span class="kicker">BUILD WEB</span><h2>Sanitized static reconstruction</h2><p class="build-copy">Re-render the scanned page and turn its current public view into static HTML. Executable scripts, frames, form submission, inline event handlers and javascript: URLs are removed.</p></div>
           <button id="buildButton" type="button" class="primary-action">Build Web</button>
         </div>
-
-        <div class="build-note">
-          The generated page can still reference public remote CSS, images, fonts and media from the source website. It is a static reconstruction, not a copy of the target backend or JavaScript application.
-        </div>
-
-        <div id="buildLoading" class="inline-loading hidden">
-          <div class="spinner small" aria-hidden="true"></div>
-          <span>Rendering and sanitizing the page…</span>
-        </div>
-
+        <div class="build-note">The generated page can still reference public remote CSS, images, fonts and media from the source website. It is a static reconstruction, not a copy of the target backend or JavaScript application.</div>
+        <div id="buildLoading" class="inline-loading hidden"><div class="spinner small" aria-hidden="true"></div><span>Rendering and sanitizing the page…</span></div>
         <div id="buildResult" class="hidden">
           <div id="buildMetrics" class="mini-grid build-metrics"></div>
-          <div class="preview-toolbar">
-            <div>
-              <strong id="buildTitle">Static preview</strong>
-              <span id="buildMeta"></span>
-            </div>
-            <div class="preview-actions">
-              <button id="openPreviewButton" type="button" class="secondary-action">Open preview</button>
-              <button id="downloadButton" type="button" class="primary-action">Download HTML</button>
-            </div>
-          </div>
-          <div class="preview-shell">
-            <iframe id="previewFrame" title="Sanitized reconstructed page preview" sandbox=""></iframe>
-          </div>
+          <div class="preview-toolbar"><div><strong id="buildTitle">Static preview</strong><span id="buildMeta"></span></div><div class="preview-actions"><button id="openPreviewButton" type="button" class="secondary-action">Open preview</button><button id="downloadButton" type="button" class="primary-action">Download HTML</button></div></div>
+          <div class="preview-shell"><iframe id="previewFrame" title="Sanitized reconstructed page preview" sandbox=""></iframe></div>
         </div>
       </article>
 
-      <article class="panel data-panel">
-        <div class="panel-head compact">
-          <div><span class="kicker">FINGERPRINT</span><h2>Technology & exposure clues</h2></div>
-        </div>
-        <div id="techChips" class="chips"></div>
-        <div class="section-divider"></div>
-        <h3>Discovered API-like URLs</h3>
-        <div id="apiList" class="url-list"></div>
-      </article>
-
-      <article class="panel data-panel">
-        <div class="panel-head compact">
-          <div><span class="kicker">ASSETS</span><h2>Frontend inventory</h2></div>
-        </div>
-        <div id="assetTabs" class="asset-tabs"></div>
-      </article>
-
-      <article class="panel data-panel">
-        <div class="panel-head compact">
-          <div><span class="kicker">SECURITY HEADERS</span><h2>Presence check</h2></div>
-        </div>
-        <div id="securityHeaders" class="header-grid"></div>
-      </article>
-
-      <details class="panel json-panel">
-        <summary>Raw JSON report</summary>
-        <pre id="jsonOutput"></pre>
-      </details>
+      <article class="panel data-panel"><div class="panel-head compact"><div><span class="kicker">FINGERPRINT</span><h2>Technology & exposure clues</h2></div></div><div id="techChips" class="chips"></div><div class="section-divider"></div><h3>Discovered API-like URLs</h3><div id="apiList" class="url-list"></div></article>
+      <article class="panel data-panel"><div class="panel-head compact"><div><span class="kicker">ASSETS</span><h2>Frontend inventory</h2></div></div><div id="assetTabs" class="asset-tabs"></div></article>
+      <article class="panel data-panel"><div class="panel-head compact"><div><span class="kicker">SECURITY HEADERS</span><h2>Presence check</h2></div></div><div id="securityHeaders" class="header-grid"></div></article>
+      <details class="panel json-panel"><summary>Raw JSON report</summary><pre id="jsonOutput"></pre></details>
     </section>
 
-    <footer>
-      Passive Fetch / Render Auditor · Cloudflare Workers + Browser Run
-    </footer>
+    <footer>Passive Fetch / Render Auditor · Cloudflare Workers + Standalone Landingpage Generator</footer>
   </main>
 
   <script type="module" src="/app.js"></script>
   <script type="module" src="/v2.js"></script>
+  <script type="module" src="/landingpage.js"></script>
 </body>
 </html>
