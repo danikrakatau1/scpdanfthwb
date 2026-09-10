@@ -10,7 +10,7 @@ if (panel) {
   v2Button.id = 'buildV2Button';
   v2Button.type = 'button';
   v2Button.className = 'primary-action v2-primary';
-  v2Button.textContent = 'Build V2.4.1 · Motion Guard Finalizer';
+  v2Button.textContent = 'Build V2.5 · Spatial Fidelity Engine';
 
   if (oldButton?.parentElement) {
     oldButton.parentElement.appendChild(actions);
@@ -23,7 +23,7 @@ if (panel) {
   result.innerHTML = `
     <div class="v2-result-head">
       <div>
-        <span class="kicker">MOTION GUARD FINALIZER V2.4.1</span>
+        <span class="kicker">SPATIAL FIDELITY ENGINE V2.5</span>
         <h3 id="v2Title">Generated reconstruction</h3>
         <p id="v2Meta"></p>
       </div>
@@ -33,8 +33,8 @@ if (panel) {
       </div>
     </div>
     <div id="v2Metrics" class="mini-grid build-metrics"></div>
-    <div class="v2-note">V2.4.1 preserves the V2.1.3 Structure Baseline, V2.2.1 Geometry Baseline and V2.3.3 Visual Baseline, keeps the V2.4 motion layer, and finalizes reduced-motion encounter state so inactive images stay hidden while the active image remains visible. Target JavaScript, target layout CSS and target font files remain excluded.</div>
-    <div class="preview-shell v2-preview-shell"><iframe id="v2Preview" title="Motion guard finalizer preview" sandbox="allow-scripts"></iframe></div>`;
+    <div class="v2-note">V2.5 preserves the locked V2.1.3 Structure, V2.2.1 Geometry, V2.3.3 Visual and V2.4.1 Motion baselines, then adds generated spatial depth: pointer-responsive hero perspective, lightweight background parallax, card depth feedback and scroll depth instrumentation. This stage intentionally uses CSS 3D + our JS only; WebGL/Three.js is not forced when the source does not require it. Target JavaScript, target layout CSS, target Three.js/shaders and font files remain excluded.</div>
+    <div class="preview-shell v2-preview-shell"><iframe id="v2Preview" title="Spatial fidelity reconstruction preview" sandbox="allow-scripts"></iframe></div>`;
   panel.appendChild(result);
 
   injectStyles();
@@ -50,7 +50,7 @@ if (panel) {
     hideError();
     v2Button.disabled = true;
     const previous = v2Button.textContent;
-    v2Button.textContent = 'Building V2.4.1 finalizer…';
+    v2Button.textContent = 'Building V2.5 spatial fidelity…';
     result.classList.add('hidden');
 
     try {
@@ -69,7 +69,7 @@ if (panel) {
       result.classList.remove('hidden');
       result.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (error) {
-      showError('Unable to build V2.4.1 reconstruction', error.message || String(error));
+      showError('Unable to build V2.5 reconstruction', error.message || String(error));
     } finally {
       v2Button.disabled = false;
       v2Button.textContent = previous;
@@ -90,7 +90,7 @@ if (panel) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = currentBuild.filename || 'clean-reconstruction-v241.html';
+    a.download = currentBuild.filename || 'clean-reconstruction-v25.html';
     document.body.appendChild(a);
     a.click();
     a.remove();
@@ -99,27 +99,25 @@ if (panel) {
 
   function render(build) {
     const stats = build.stats || {};
-    result.querySelector('#v2Title').textContent = build.title || 'Motion guard finalizer reconstruction';
-    result.querySelector('#v2Meta').textContent = `${formatBytes(build.htmlBytes || 0)} · ${formatDuration(build.durationMs || 0)} · motion guard finalized · locked baselines · no target JS/CSS copy`;
+    result.querySelector('#v2Title').textContent = build.title || 'Spatial fidelity reconstruction';
+    result.querySelector('#v2Meta').textContent = `${formatBytes(build.htmlBytes || 0)} · ${formatDuration(build.durationMs || 0)} · four locked baselines · generated spatial depth · no target JS/CSS/3D code copy`;
 
     const metrics = [
       ['Structure lock', stats.structuralLockReady ? 'READY' : 'CHECK'],
       ['Geometry lock', stats.geometryLockReady ? 'READY' : 'BLOCKED'],
       ['Visual baseline', stats.visualBaselinePreserved ? 'LOCKED' : 'CHECK'],
-      ['Motion engine', stats.motionFidelityEngineApplied ? 'ACTIVE' : 'CHECK'],
+      ['Motion baseline', stats.motionBaselinePreserved ? 'LOCKED' : 'CHECK'],
+      ['Spatial engine', stats.spatialFidelityEngineApplied ? 'ACTIVE' : 'CHECK'],
+      ['Spatial CSS', stats.spatialCssApplied ? 'OWN CSS' : 'CHECK'],
+      ['Spatial JS', stats.spatialJsApplied ? 'OWN JS' : 'CHECK'],
+      ['Depth layering', stats.spatialDepthLayeringApplied ? 'ACTIVE' : 'CHECK'],
+      ['Pointer depth', stats.pointerDepthResponseApplied ? 'ACTIVE' : 'CHECK'],
+      ['Scroll depth', stats.scrollDepthResponseApplied ? 'ACTIVE' : 'CHECK'],
+      ['Hero perspective', stats.heroPerspectiveResponseApplied ? 'ACTIVE' : 'CHECK'],
+      ['Card depth', stats.cardDepthFeedbackApplied ? 'ACTIVE' : 'CHECK'],
+      ['Reduced motion', stats.reducedMotionSpatialGuardApplied ? 'GUARDED' : 'CHECK'],
+      ['WebGL used', stats.spatialWebGLUsed ?? 0],
       ['Motion guard', stats.motionGuardFinalizerApplied ? 'READY' : 'CHECK'],
-      ['Reduced motion', stats.reducedMotionEncounterStateGuardApplied ? 'GUARDED' : 'CHECK'],
-      ['Inactive encounter', stats.reducedMotionInactiveEncounterHidden ? 'HIDDEN' : 'CHECK'],
-      ['Active encounter', stats.reducedMotionActiveEncounterVisible ? 'VISIBLE' : 'CHECK'],
-      ['Motion baseline candidate', stats.motionBaselineCandidateReady ? 'READY' : 'HOLD'],
-      ['Baseline bridge', stats.baselineCompatibilityBridgeApplied ? 'ACTIVE' : 'CHECK'],
-      ['Menu choreography', stats.menuMotionChoreographyApplied ? 'ACTIVE' : 'CHECK'],
-      ['Submenu choreography', stats.submenuMotionChoreographyApplied ? 'ACTIVE' : 'CHECK'],
-      ['Reveal motion', stats.revealMotionPolishApplied ? 'ACTIVE' : 'CHECK'],
-      ['Encounter motion', stats.encounterMotionPolishApplied ? 'ACTIVE' : 'CHECK'],
-      ['Hover / press', stats.hoverPressFeedbackApplied ? 'ACTIVE' : 'CHECK'],
-      ['Generated motion CSS', stats.generatedMotionCssApplied ? 'OWN CSS' : 'CHECK'],
-      ['Generated motion JS', stats.generatedMotionJsApplied ? 'OWN JS' : 'CHECK'],
       ['Target scripts copied', stats.targetScriptsCopied ?? 0],
       ['Target layout CSS copied', stats.targetLayoutCssCopied ?? 0],
     ];
